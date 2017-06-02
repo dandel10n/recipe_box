@@ -3,6 +3,26 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import { storageAvaliable } from './utils';
 
+
+const Recipes = (props) => {
+    return (
+        <div>
+            { props.recipes.map(recipe => {
+                return (
+                    <div key={recipe.id}>
+                        <p>{recipe.title}</p>
+                        <p>{recipe.ingredients.map((ingridient, index) => {
+                                return <li key={index}>{ ingridient }</li>
+                            })}
+                        </p>
+                    </div>
+                    )
+                })
+            }
+        </div>
+    )
+}
+
 class RecipeBox extends React.Component {
     localStorageKey = "dandel10n_recipes";
     constructor(props) {
@@ -21,11 +41,6 @@ class RecipeBox extends React.Component {
             ]
         }
         this.isStorageAvailible = storageAvaliable('localStorage');
-        this.handleChange = this.handleChange.bind(this);
-    }
-
-    updateLocalStorage() {
-        localStorage.setItem(this.localStorageKey, JSON.stringify(this.state.recipes));
     }
 
     componentWillMount() {
@@ -37,8 +52,12 @@ class RecipeBox extends React.Component {
         }
     }
 
-    handleChange(event) {
-        this.setState({recipes: event.target.value});
+    componentDidUpdate() {
+        this.updateLocalStorage();
+    }
+
+    updateLocalStorage() {
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.state.recipes));
     }
 
     render() {
@@ -49,22 +68,10 @@ class RecipeBox extends React.Component {
                     of technical problems :(
                 </div>
             )
-        }
-
-        const{recipes} = this.state;
-        return (
+        } return (
             <div className="container">
                 <div>Reciepe Box</div>
-                {
-                    recipes.map(item => {
-                        return (
-                            <div key={item.id}>
-                                <p>{item.title}</p>
-                                <p>{item.ingredients}</p>
-                            </div>
-                        )
-                    })
-                }
+                <Recipes recipes={this.state.recipes}/>
             </div>
         );
     }
