@@ -1,20 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-
-function storageAvaliable(type) {
-    try {
-        var storage = window[type],
-        x = '__storage_test__';
-        storage.setItem(x,x);
-        storage.removeItem(x);
-        return true;
-    } catch(e) {
-        return false;
-    }
-}
+import { storageAvaliable } from './utils';
 
 class RecipeBox extends React.Component {
+    localStorageKey = "dandel10n_recipes";
     constructor(props) {
         super(props);
         this.state = {
@@ -35,12 +25,12 @@ class RecipeBox extends React.Component {
     }
 
     updateLocalStorage() {
-        localStorage.setItem('recipeBox', JSON.stringify(this.state.recipes));
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.state.recipes));
     }
 
     componentWillMount() {
         if (this.isStorageAvailible) {
-            const savedData = localStorage.getItem('dandel10n_recipes');
+            const savedData = localStorage.getItem(this.localStorageKey);
             if (savedData) {
                 this.setState({ recipes: JSON.parse(savedData) });
             }
