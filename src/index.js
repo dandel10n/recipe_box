@@ -15,6 +15,12 @@ const Recipes = (props) => {
                                 return <li key={indexOfIng}>{ ingredient }</li>
                             })}
                         </p>
+                        <Button onPress={props.editRecipe}
+                            buttonName="Edit"
+                        />
+                        <Button onPress={() => props.deleteRecipe(indexOfRecipe)}
+                            buttonName="Delete"
+                        />
                     </div>
                     )
                 })
@@ -42,6 +48,8 @@ class RecipeBox extends React.Component {
         this.isStorageAvailible = storageAvaliable('localStorage');
         this.handleSubmit = this.handleSubmit.bind(this);
         this.addRecipe = this.addRecipe.bind(this);
+        this.deleteRecipe = this.deleteRecipe.bind(this);
+        this.editRecipe = this.editRecipe.bind(this);
     }
 
     componentWillMount() {
@@ -80,6 +88,16 @@ class RecipeBox extends React.Component {
         });
     }
 
+    deleteRecipe(index) {
+        const newArrayOfRecipes = this.state.recipes;
+        newArrayOfRecipes.splice(index, 1);
+        this.setState({ recipes: newArrayOfRecipes });
+    }
+
+    editRecipe() {
+        console.log("edit");
+    }
+
     render() {
         if (!this.isStorageAvailible) {
             return (
@@ -91,7 +109,7 @@ class RecipeBox extends React.Component {
         } return (
             <div className="container">
                 <div>Reciepe Box</div>
-                <Recipes recipes={this.state.recipes}/>
+                <Recipes recipes={this.state.recipes} deleteRecipe={this.deleteRecipe} editRecipe={this.editRecipe}/>
                 <form ref={input => this.addForm = input}
                     onSubmit={ e => this.handleSubmit(e) }
                 >
@@ -111,6 +129,24 @@ class RecipeBox extends React.Component {
                 </form>
             </div>
         );
+    }
+}
+
+class Button extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handlePress = this.handlePress.bind(this);
+    }
+
+    render() {
+        return (
+            <button href="#" onClick={this.handlePress}>{this.props.buttonName}</button>
+        )
+    }
+
+    handlePress(e) {
+        e.preventDefault();
+        this.props.onPress();
     }
 }
 
