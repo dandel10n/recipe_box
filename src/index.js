@@ -38,14 +38,10 @@ class RecipeBox extends React.Component {
                     ingredients: ["ing1", "ing2", "ing3"],
                 }
             ],
-            formTitle: '',
-            formIngredients: []
         }
         this.isStorageAvailible = storageAvaliable('localStorage');
-        this.addRecipe = this.addRecipe.bind(this);
-        this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleTextareaChange = this.handleTextareaChange.bind(this);
+        this.addRecipe = this.addRecipe.bind(this);
     }
 
     componentWillMount() {
@@ -61,38 +57,27 @@ class RecipeBox extends React.Component {
         localStorage[this.localStorageKey] = JSON.stringify(this.state.recipes);
     }
 
-    handleInputChange(event) {
-        const target = event.target;
-        const value = target.value;
-        const name = target.name;
-
-        this.setState({[name]: value});
-    }
-
-    handleTextareaChange(event) {
-        const target = event.target;
-        const ingredientsArray = target.value.split(',');
-        /*TODO delete spaces before and after ingredients*/
-        const name = target.name;
-
-        this.setState({[name]: ingredientsArray});
-    }
-
     handleSubmit(event) {
         event.preventDefault();
-        const formTitle = this.state.formTitle;
-        const formIngredients = this.state.formIngredients;
-        this.addRecipe(formTitle, formIngredients);
+        const newRecipeTitle = this.newRecipeTitle.value;
+        const newRecipeIngredients = this.newRecipeIngredients.value.split(',').map(
+            item => { return item.trim() }
+        );
+
+        this.addRecipe(newRecipeTitle, newRecipeIngredients);
+
+        this.addForm.reset();
     }
 
     addRecipe(recipeTitle, recipeIngredients)  {
-        const recipes = this.state.recipes;
-        const recipe = {
+        const {recipes} = this.state;
+        const newRecipe = {
             title: recipeTitle,
             ingredients: recipeIngredients,
         }
-        const updatedRecipes = recipes.concat([recipe]);
-        this.setState({ recipes: updatedRecipes });
+        this.setState({
+            recipes: [...recipes, newRecipe]
+        });
     }
 
     render() {
@@ -107,18 +92,20 @@ class RecipeBox extends React.Component {
             <div className="container">
                 <div>Reciepe Box</div>
                 <Recipes recipes={this.state.recipes}/>
-                <form onSubmit={this.handleSubmit}>
+                <form ref={input => this.addForm = input}
+                    onSubmit={ e => this.handleSubmit(e) }
+                >
                     <input
+                        ref={input => this.newRecipeTitle = input}
                         type="text"
                         name="formTitle"
                         placeholder={"Enter title"}
-                        onChange= {this.handleInputChange}
                     />
                     <textarea
+                        ref={input => this.newRecipeIngredients = input}
                         type="text"
                         name="formIngredients"
                         placeholder={"Enter ingredients"}
-                        onChange= {this.handleTextareaChange}
                     />
                     <input type="submit" value="Save" />
                 </form>
