@@ -46,7 +46,6 @@ class RecipeBox extends React.Component {
             ],
         }
         this.isStorageAvailible = storageAvaliable('localStorage');
-        this.handleSubmit = this.handleSubmit.bind(this);
         this.addRecipe = this.addRecipe.bind(this);
         this.deleteRecipe = this.deleteRecipe.bind(this);
         this.editRecipe = this.editRecipe.bind(this);
@@ -63,18 +62,6 @@ class RecipeBox extends React.Component {
 
     componentDidUpdate() {
         localStorage[this.localStorageKey] = JSON.stringify(this.state.recipes);
-    }
-
-    handleSubmit(event) {
-        event.preventDefault();
-        const newRecipeTitle = this.newRecipeTitle.value;
-        const newRecipeIngredients = this.newRecipeIngredients.value.split(',').map(
-            item => { return item.trim() }
-        );
-
-        this.addRecipe(newRecipeTitle, newRecipeIngredients);
-
-        this.addForm.reset();
     }
 
     addRecipe(recipeTitle, recipeIngredients)  {
@@ -109,26 +96,55 @@ class RecipeBox extends React.Component {
         } return (
             <div className="container">
                 <div>Reciepe Box</div>
-                <Recipes recipes={this.state.recipes} deleteRecipe={this.deleteRecipe} editRecipe={this.editRecipe}/>
-                <form ref={input => this.addForm = input}
-                    onSubmit={ e => this.handleSubmit(e) }
-                >
-                    <input
-                        ref={input => this.newRecipeTitle = input}
-                        type="text"
-                        name="formTitle"
-                        placeholder={"Enter title"}
-                    />
-                    <textarea
-                        ref={input => this.newRecipeIngredients = input}
-                        type="text"
-                        name="formIngredients"
-                        placeholder={"Enter ingredients"}
-                    />
-                    <input type="submit" value="Save" />
-                </form>
+                <Recipes
+                    recipes={this.state.recipes}
+                    deleteRecipe={this.deleteRecipe}
+                    editRecipe={this.editRecipe}
+                />
+                <Form addRecipe={this.addRecipe}/>
             </div>
         );
+    }
+}
+
+class Form extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleSubmit(event) {
+        event.preventDefault();
+        const newRecipeTitle = this.newRecipeTitle.value;
+        const newRecipeIngredients = this.newRecipeIngredients.value.split(',').map(
+            item => { return item.trim() }
+        );
+
+        this.props.addRecipe(newRecipeTitle, newRecipeIngredients);
+
+        this.addForm.reset();
+    }
+
+    render() {
+        return (
+            <form ref={input => this.addForm = input}
+                onSubmit={ e => this.handleSubmit(e) }
+            >
+                <input
+                    ref={input => this.newRecipeTitle = input}
+                    type="text"
+                    name="formTitle"
+                    placeholder={"Enter title"}
+                />
+                <textarea
+                    ref={input => this.newRecipeIngredients = input}
+                    type="text"
+                    name="formIngredients"
+                    placeholder={"Enter ingredients"}
+                />
+                <input type="submit" value="Save" />
+            </form>
+        )
     }
 }
 
