@@ -15,10 +15,12 @@ const Recipes = (props) => {
                                 return <li key={indexOfIng}>{ ingredient }</li>
                             })}
                         </p>
-                        <Button onPress={props.editRecipe}
+                        <Button
+                            onPress={props.editRecipe}
                             buttonName="Edit"
                         />
-                        <Button onPress={() => props.deleteRecipe(indexOfRecipe)}
+                        <Button
+                            onPress={() => props.deleteRecipe(indexOfRecipe)}
                             buttonName="Delete"
                         />
                     </div>
@@ -44,11 +46,14 @@ class RecipeBox extends React.Component {
                     ingredients: ["ing1", "ing2", "ing3"],
                 }
             ],
+            formIsShown: false
         }
         this.isStorageAvailible = storageAvaliable('localStorage');
         this.addRecipe = this.addRecipe.bind(this);
         this.deleteRecipe = this.deleteRecipe.bind(this);
         this.editRecipe = this.editRecipe.bind(this);
+        this.showForm = this.showForm.bind(this);
+        this.hideForm = this.hideForm.bind(this);
     }
 
     componentWillMount() {
@@ -85,6 +90,14 @@ class RecipeBox extends React.Component {
         console.log("edit");
     }
 
+    showForm() {
+        this.setState({ formIsShown: true });
+    }
+
+    hideForm() {
+        this.setState({ formIsShown: false });
+    }
+
     render() {
         if (!this.isStorageAvailible) {
             return (
@@ -93,17 +106,32 @@ class RecipeBox extends React.Component {
                     of technical problems :(
                 </div>
             )
-        } return (
-            <div className="container">
-                <div>Reciepe Box</div>
-                <Recipes
-                    recipes={this.state.recipes}
-                    deleteRecipe={this.deleteRecipe}
-                    editRecipe={this.editRecipe}
-                />
-                <Form addRecipe={this.addRecipe}/>
-            </div>
-        );
+        } else {
+            if (!this.state.formIsShown) {
+                return (
+                    <div className="container">
+                        <div>Reciepe Box</div>
+                        <Recipes
+                            recipes={this.state.recipes}
+                            deleteRecipe={this.deleteRecipe}
+                            editRecipe={this.editRecipe}
+                        />
+                        <Button
+                            onPress={this.showForm}
+                            buttonName="Add recipe"
+                        />
+                    </div>
+                )
+            } return (
+                <div className="container">
+                    <div>Reciepe Box</div>
+                    <Form
+                        onCancel={this.hideForm}
+                        onSubmit={this.addRecipe}
+                    />
+                </div>
+            );
+        }
     }
 }
 
@@ -111,6 +139,7 @@ class Form extends React.Component {
     constructor(props) {
         super(props);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleCancel = this.handleCancel.bind(this);
     }
 
     handleSubmit(event) {
@@ -120,14 +149,19 @@ class Form extends React.Component {
             item => { return item.trim() }
         );
 
-        this.props.addRecipe(newRecipeTitle, newRecipeIngredients);
+        this.props.onSubmit(newRecipeTitle, newRecipeIngredients);
 
-        this.addForm.reset();
+        this.handleCancel();
+    }
+
+    handleCancel() {
+        this.props.onCancel();
     }
 
     render() {
         return (
-            <form ref={input => this.addForm = input}
+            <form
+                ref={input => this.addForm = input}
                 onSubmit={ e => this.handleSubmit(e) }
             >
                 <input
@@ -143,6 +177,7 @@ class Form extends React.Component {
                     placeholder={"Enter ingredients"}
                 />
                 <input type="submit" value="Save" />
+                <Button onPress={this.handleCancel} buttonName="Cancel"/>
             </form>
         )
     }
