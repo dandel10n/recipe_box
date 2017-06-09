@@ -16,7 +16,7 @@ const Recipes = (props) => {
                             })}
                         </p>
                         <Button
-                            onPress={props.editRecipe}
+                            onPress={() => props.editRecipe(recipe)}
                             buttonName="Edit"
                         />
                         <Button
@@ -46,7 +46,8 @@ class RecipeBox extends React.Component {
                     ingredients: ["ing1", "ing2", "ing3"],
                 }
             ],
-            formIsShown: false
+            formIsShown: false,
+            recipeToEdit: {}
         }
         this.isStorageAvailible = storageAvaliable('localStorage');
         this.addRecipe = this.addRecipe.bind(this);
@@ -70,14 +71,17 @@ class RecipeBox extends React.Component {
     }
 
     addRecipe(recipeTitle, recipeIngredients)  {
-        const {recipes} = this.state;
+        const {recipes, recipeToEdit} = this.state;
         const newRecipe = {
             title: recipeTitle,
             ingredients: recipeIngredients,
         }
-        this.setState({
-            recipes: [...recipes, newRecipe]
-        });
+        const editedResipesArray = recipes;
+        editedResipesArray.splice(editedResipesArray.indexOf(recipeToEdit), 1, newRecipe);
+
+        recipeToEdit === "" && this.setState({ recipes: [...recipes, newRecipe] });
+
+        recipeToEdit !== "" && this.setState({ recipes: editedResipesArray });
     }
 
     deleteRecipe(index) {
@@ -86,8 +90,9 @@ class RecipeBox extends React.Component {
         this.setState({ recipes: newArrayOfRecipes });
     }
 
-    editRecipe() {
-        console.log("edit");
+    editRecipe(recipe) {
+        this.setState({ recipeToEdit: recipe });
+        this.showForm();
     }
 
     showForm() {
@@ -95,7 +100,10 @@ class RecipeBox extends React.Component {
     }
 
     hideForm() {
-        this.setState({ formIsShown: false });
+        this.setState({
+            formIsShown: false,
+            recipeToEdit: ''
+         });
     }
 
     render() {
@@ -128,6 +136,7 @@ class RecipeBox extends React.Component {
                     <Form
                         onCancel={this.hideForm}
                         onSubmit={this.addRecipe}
+                        recipe={this.state.recipeToEdit}
                     />
                 </div>
             );
@@ -169,12 +178,14 @@ class Form extends React.Component {
                     type="text"
                     name="formTitle"
                     placeholder={"Enter title"}
+                    defaultValue={this.props.recipe.title || ""}
                 />
                 <textarea
                     ref={input => this.newRecipeIngredients = input}
                     type="text"
                     name="formIngredients"
                     placeholder={"Enter ingredients"}
+                    defaultValue={this.props.recipe.ingredients || ""}
                 />
                 <input type="submit" value="Save" />
                 <Button onPress={this.handleCancel} buttonName="Cancel"/>
