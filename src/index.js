@@ -6,23 +6,32 @@ import { storageAvaliable } from './utils';
 
 const Recipes = (props) => {
     return (
-        <div>
+        <div className="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
             { props.recipes.map((recipe, indexOfRecipe) => {
                 return (
-                    <div key={indexOfRecipe}>
-                        <p>{recipe.title}</p>
-                        <p>{recipe.ingredients.map((ingredient, indexOfIng) => {
-                                return <li key={indexOfIng}>{ ingredient }</li>
-                            })}
-                        </p>
-                        <Button
-                            onPress={() => props.editRecipe(recipe)}
-                            buttonName="Edit"
-                        />
-                        <Button
-                            onPress={() => props.deleteRecipe(indexOfRecipe)}
-                            buttonName="Delete"
-                        />
+                    <div className="panel panel-default" key={indexOfRecipe}>
+                        <div className="panel-heading" role="tab">
+                            <h4 className="panel-title">
+                                <a role="button" data-toggle="collapse" data-parent="#accordion" href={ "#recipe-data-" + indexOfRecipe} aria-expanded="true" aria-controls={ "#recipe-data-" + indexOfRecipe}>
+                                    {recipe.title}
+                                </a>
+                            </h4>
+                        </div>
+                        <div id={"recipe-data-" + indexOfRecipe} className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                            <div className="panel-body">
+                                {recipe.ingredients.map((ingredient, indexOfIng) => {
+                                    return <li key={indexOfIng}>{ ingredient }</li>
+                                })}
+                            </div>
+                            <Button
+                                onPress={() => props.editRecipe(recipe)}
+                                buttonName="Edit"
+                            />
+                            <Button
+                                onPress={() => props.deleteRecipe(indexOfRecipe)}
+                                buttonName="Delete"
+                            />
+                        </div>
                     </div>
                     )
                 })
@@ -47,7 +56,7 @@ class RecipeBox extends React.Component {
                 }
             ],
             formIsShown: false,
-            recipeToEdit: {}
+            recipeToEdit: ""
         }
         this.isStorageAvailible = storageAvaliable('localStorage');
         this.addRecipe = this.addRecipe.bind(this);
@@ -76,12 +85,13 @@ class RecipeBox extends React.Component {
             title: recipeTitle,
             ingredients: recipeIngredients,
         }
-        const editedResipesArray = recipes;
-        editedResipesArray.splice(editedResipesArray.indexOf(recipeToEdit), 1, newRecipe);
-
-        recipeToEdit === "" && this.setState({ recipes: [...recipes, newRecipe] });
-
-        recipeToEdit !== "" && this.setState({ recipes: editedResipesArray });
+        const editedRecipesArray = recipes;
+        if ( editedRecipesArray.indexOf(recipeToEdit) !== -1 ) {
+            editedRecipesArray.splice(editedRecipesArray.indexOf(recipeToEdit), 1, newRecipe);
+            this.setState({ recipes: editedRecipesArray });
+        } else {
+            this.setState({ recipes: [...recipes, newRecipe] });
+        }
     }
 
     deleteRecipe(index) {
@@ -102,7 +112,7 @@ class RecipeBox extends React.Component {
     hideForm() {
         this.setState({
             formIsShown: false,
-            recipeToEdit: ''
+            recipeToEdit: ""
          });
     }
 
@@ -118,7 +128,7 @@ class RecipeBox extends React.Component {
             if (!this.state.formIsShown) {
                 return (
                     <div className="container">
-                        <div>Reciepe Box</div>
+                        <div>Recipe Box</div>
                         <Recipes
                             recipes={this.state.recipes}
                             deleteRecipe={this.deleteRecipe}
@@ -202,7 +212,7 @@ class Button extends React.Component {
 
     render() {
         return (
-            <button href="#" onClick={this.handlePress}>{this.props.buttonName}</button>
+            <button href="#" className="btn btn-default btn-sm" onClick={this.handlePress}>{this.props.buttonName}</button>
         )
     }
 
