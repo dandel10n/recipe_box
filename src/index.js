@@ -10,27 +10,39 @@ const Recipes = (props) => {
             { props.recipes.map((recipe, indexOfRecipe) => {
                 return (
                     <div className="panel panel-default" key={indexOfRecipe}>
-                        <div className="panel-heading" role="tab">
+                        <div className="panel-heading"
+                             role="tab"
+                             id={"recipe-title-" + indexOfRecipe}>
                             <h4 className="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#accordion" href={ "#recipe-data-" + indexOfRecipe} aria-expanded="true" aria-controls={ "#recipe-data-" + indexOfRecipe}>
+                                <a role="button"
+                                   data-toggle="collapse"
+                                   data-parent="#accordion"
+                                   href={ "#recipe-data-" + indexOfRecipe}
+                                   aria-expanded="true"
+                                   aria-controls={ "#recipe-data-" + indexOfRecipe}>
                                     {recipe.title}
                                 </a>
                             </h4>
                         </div>
-                        <div id={"recipe-data-" + indexOfRecipe} className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                        <div id={"recipe-data-" + indexOfRecipe}
+                             className="panel-collapse collapse"
+                             role="tabpanel"
+                             aria-labelledby={"recipe-title-" + indexOfRecipe}>
                             <div className="panel-body">
                                 {recipe.ingredients.map((ingredient, indexOfIng) => {
                                     return <li key={indexOfIng}>{ ingredient }</li>
                                 })}
                             </div>
-                            <Button
-                                onPress={() => props.editRecipe(recipe)}
-                                buttonName="Edit"
-                            />
-                            <Button
-                                onPress={() => props.deleteRecipe(indexOfRecipe)}
-                                buttonName="Delete"
-                            />
+                            <button
+                                value="Edit"
+                                className="btn btn-default btn-sm"
+                                onClick={() => props.handleEditButtonClick(recipe)}
+                            >Edit</button>
+                            <button
+                                value="Delete"
+                                className="btn btn-default btn-sm"
+                                onClick={() => props.deleteRecipe(indexOfRecipe)}
+                            >Delete</button>
                         </div>
                     </div>
                     )
@@ -56,12 +68,13 @@ class RecipeBox extends React.Component {
                 }
             ],
             formIsShown: false,
-            recipeToEdit: ""
+            recipeToEdit: "",
+            message: ""
         }
         this.isStorageAvailible = storageAvaliable('localStorage');
         this.addRecipe = this.addRecipe.bind(this);
         this.deleteRecipe = this.deleteRecipe.bind(this);
-        this.editRecipe = this.editRecipe.bind(this);
+        this.handleEditButtonClick = this.handleEditButtonClick.bind(this);
         this.showForm = this.showForm.bind(this);
         this.hideForm = this.hideForm.bind(this);
     }
@@ -86,11 +99,17 @@ class RecipeBox extends React.Component {
             ingredients: recipeIngredients,
         }
         const editedRecipesArray = recipes;
+
         if ( editedRecipesArray.indexOf(recipeToEdit) !== -1 ) {
             editedRecipesArray.splice(editedRecipesArray.indexOf(recipeToEdit), 1, newRecipe);
-            this.setState({ recipes: editedRecipesArray });
+            this.setState({
+                recipes: editedRecipesArray
+            });
         } else {
-            this.setState({ recipes: [...recipes, newRecipe] });
+            this.setState({
+                recipes: [...recipes, newRecipe],
+                message: ""
+            });
         }
     }
 
@@ -98,9 +117,15 @@ class RecipeBox extends React.Component {
         const newArrayOfRecipes = this.state.recipes;
         newArrayOfRecipes.splice(index, 1);
         this.setState({ recipes: newArrayOfRecipes });
+
+        if (newArrayOfRecipes.length === 0) {
+            this.setState({
+                message: "No recipes in your box, add some."
+            })
+        }
     }
 
-    editRecipe(recipe) {
+    handleEditButtonClick(recipe) {
         this.setState({ recipeToEdit: recipe });
         this.showForm();
     }
@@ -128,26 +153,34 @@ class RecipeBox extends React.Component {
             if (!this.state.formIsShown) {
                 return (
                     <div className="container">
-                        <div>Recipe Box</div>
-                        <Recipes
-                            recipes={this.state.recipes}
-                            deleteRecipe={this.deleteRecipe}
-                            editRecipe={this.editRecipe}
-                        />
-                        <Button
-                            onPress={this.showForm}
-                            buttonName="Add recipe"
-                        />
+                        <h1 className="text-center">Recipe Box</h1>
+                        <div className="content">
+                            {
+                                this.state.message !== "" && <p className="message text-danger">{this.state.message}</p>
+                            }
+                            <Recipes
+                                recipes={this.state.recipes}
+                                deleteRecipe={this.deleteRecipe}
+                                handleEditButtonClick={this.handleEditButtonClick}
+                            />
+                            <button
+                                value="addRecipe"
+                                className="btn btn-default"
+                                onClick={this.showForm}
+                            >Add recipe</button>
+                        </div>
                     </div>
                 )
             } return (
                 <div className="container">
-                    <div>Reciepe Box</div>
-                    <Form
-                        onCancel={this.hideForm}
-                        onSubmit={this.addRecipe}
-                        recipe={this.state.recipeToEdit}
-                    />
+                    <h1 className="text-center">Recipe Box</h1>
+                    <div className="content">
+                        <Form
+                            onCancel={this.hideForm}
+                            onSubmit={this.addRecipe}
+                            recipe={this.state.recipeToEdit}
+                        />
+                    </div>
                 </div>
             );
         }
@@ -168,9 +201,10 @@ class Form extends React.Component {
             item => { return item.trim() }
         );
 
-        this.props.onSubmit(newRecipeTitle, newRecipeIngredients);
-
-        this.handleCancel();
+        if (newRecipeTitle !== '' && newRecipeIngredients[0] !== '') {
+            this.props.onSubmit(newRecipeTitle, newRecipeIngredients);
+            this.handleCancel();
+        }
     }
 
     handleCancel() {
@@ -183,42 +217,40 @@ class Form extends React.Component {
                 ref={input => this.addForm = input}
                 onSubmit={ e => this.handleSubmit(e) }
             >
-                <input
-                    ref={input => this.newRecipeTitle = input}
-                    type="text"
-                    name="formTitle"
-                    placeholder={"Enter title"}
-                    defaultValue={this.props.recipe.title || ""}
-                />
-                <textarea
-                    ref={input => this.newRecipeIngredients = input}
-                    type="text"
-                    name="formIngredients"
-                    placeholder={"Enter ingredients"}
-                    defaultValue={this.props.recipe.ingredients || ""}
-                />
-                <input type="submit" value="Save" />
-                <Button onPress={this.handleCancel} buttonName="Cancel"/>
+                <div className="form-group">
+                    <label htmlFor="newRecipeTitle">Recipe</label>
+                    <input
+                        className="form-control"
+                        id="newRecipeTitle"
+                        ref={input => this.newRecipeTitle = input}
+                        type="text"
+                        name="formTitle"
+                        placeholder={"Recipe name"}
+                        defaultValue={this.props.recipe.title || ""}
+                    />
+                    <label htmlFor="newRecipeIngredients">Ingredients</label>
+                    <textarea
+                        className="form-control"
+                        id="newRecipeIngredients"
+                        ref={input => this.newRecipeIngredients = input}
+                        rows="3"
+                        name="formIngredients"
+                        placeholder={"Enter ingredients, separated by commas"}
+                        defaultValue={this.props.recipe.ingredients || ""}
+                    />
+                    <button
+                        type="submit"
+                        value="Save"
+                        className="btn btn-default btn-sm"
+                    >Save</button>
+                    <button
+                        value="Cancel"
+                        className="btn btn-default btn-sm"
+                        onClick={this.handleCancel}
+                    >Cancel</button>
+                </div>
             </form>
         )
-    }
-}
-
-class Button extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handlePress = this.handlePress.bind(this);
-    }
-
-    render() {
-        return (
-            <button href="#" className="btn btn-default btn-sm" onClick={this.handlePress}>{this.props.buttonName}</button>
-        )
-    }
-
-    handlePress(e) {
-        e.preventDefault();
-        this.props.onPress();
     }
 }
 
