@@ -30,6 +30,7 @@ button {
 
 .recipePanel .recipePanel-header {
 	background-color: #cce6ff;
+	margin-top: 7px;
 }
 .recipePanel-title a {
 	display: block;
