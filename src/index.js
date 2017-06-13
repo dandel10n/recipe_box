@@ -68,7 +68,7 @@ class RecipeBox extends React.Component {
                 }
             ],
             formIsShown: false,
-            recipeToEdit: "",
+            recipeToEdit: null,
             message: ""
         }
         this.isStorageAvailible = storageAvaliable('localStorage');
@@ -77,6 +77,7 @@ class RecipeBox extends React.Component {
         this.handleEditButtonClick = this.handleEditButtonClick.bind(this);
         this.showForm = this.showForm.bind(this);
         this.hideForm = this.hideForm.bind(this);
+        this.showMessage = this.showMessage.bind(this);
     }
 
     componentWillMount() {
@@ -131,7 +132,10 @@ class RecipeBox extends React.Component {
     }
 
     showForm() {
-        this.setState({ formIsShown: true });
+        this.setState({
+            formIsShown: true,
+            message: ""
+        });
     }
 
     hideForm() {
@@ -139,6 +143,12 @@ class RecipeBox extends React.Component {
             formIsShown: false,
             recipeToEdit: ""
          });
+    }
+
+    showMessage(errorExplanation) {
+        this.setState({
+            message: errorExplanation
+        })
     }
 
     render() {
@@ -149,15 +159,30 @@ class RecipeBox extends React.Component {
                     of technical problems :(
                 </div>
             )
-        } else {
-            if (!this.state.formIsShown) {
-                return (
-                    <div className="container">
-                        <h1 className="text-center">Recipe Box</h1>
-                        <div className="content">
-                            {
-                                this.state.message !== "" && <p className="message text-danger">{this.state.message}</p>
-                            }
+        }
+
+        return (
+            <div className="container">
+                <h1 className="text-center">Recipe Box</h1>
+                <div className="content">
+                    {
+                        this.state.message !== "" &&
+                        <p className="message text-danger">{this.state.message}</p>
+                    }
+
+                    {
+                        this.state.formIsShown &&
+                        <Form
+                            onCancel={this.hideForm}
+                            onSubmit={this.addRecipe}
+                            recipe={this.state.recipeToEdit}
+                            onError={this.showMessage}
+                        />
+                    }
+
+                    {
+                        !this.state.formIsShown &&
+                        <div>
                             <Recipes
                                 recipes={this.state.recipes}
                                 deleteRecipe={this.deleteRecipe}
@@ -169,21 +194,10 @@ class RecipeBox extends React.Component {
                                 onClick={this.showForm}
                             >Add recipe</button>
                         </div>
-                    </div>
-                )
-            } return (
-                <div className="container">
-                    <h1 className="text-center">Recipe Box</h1>
-                    <div className="content">
-                        <Form
-                            onCancel={this.hideForm}
-                            onSubmit={this.addRecipe}
-                            recipe={this.state.recipeToEdit}
-                        />
-                    </div>
+                    }
                 </div>
-            );
-        }
+            </div>
+        )
     }
 }
 
@@ -192,6 +206,7 @@ class Form extends React.Component {
         super(props);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
+        this.handleEmptyValueError = this.handleEmptyValueError.bind(this);
     }
 
     handleSubmit(event) {
@@ -199,16 +214,32 @@ class Form extends React.Component {
         const newRecipeTitle = this.newRecipeTitle.value;
         const newRecipeIngredients = this.newRecipeIngredients.value.split(',').map(
             item => { return item.trim() }
-        );
+        ).filter(item => item != "");
 
-        if (newRecipeTitle !== '' && newRecipeIngredients[0] !== '') {
+        if (newRecipeTitle !== '' && newRecipeIngredients.length !== 0) {
             this.props.onSubmit(newRecipeTitle, newRecipeIngredients);
             this.handleCancel();
+        }
+
+        if (newRecipeTitle === '') {
+            this.handleEmptyValueError('The resipe should have a title. Add some.')
+        }
+
+        if (newRecipeIngredients.length === 0) {
+            this.handleEmptyValueError('The resipe should have ingredients. Add some.')
+        }
+
+        if (newRecipeTitle === '' && newRecipeIngredients.length === 0) {
+            this.handleEmptyValueError('Form fields should be filled in.')
         }
     }
 
     handleCancel() {
         this.props.onCancel();
+    }
+
+    handleEmptyValueError(errorExplanation) {
+        this.props.onError(errorExplanation);
     }
 
     render() {
@@ -226,7 +257,7 @@ class Form extends React.Component {
                         type="text"
                         name="formTitle"
                         placeholder={"Recipe name"}
-                        defaultValue={this.props.recipe.title || ""}
+                        defaultValue={this.props.recipe && this.props.recipe.title || ""}
                     />
                     <label htmlFor="newRecipeIngredients">Ingredients</label>
                     <textarea
@@ -236,7 +267,7 @@ class Form extends React.Component {
                         rows="3"
                         name="formIngredients"
                         placeholder={"Enter ingredients, separated by commas"}
-                        defaultValue={this.props.recipe.ingredients || ""}
+                        defaultValue={this.props.recipe && this.props.recipe.ingredients || ""}
                     />
                     <button
                         type="submit"
