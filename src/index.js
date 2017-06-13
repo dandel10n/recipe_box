@@ -3,55 +3,6 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import { storageAvaliable } from './utils';
 
-
-const Recipes = (props) => {
-    return (
-        <div className="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-            { props.recipes.map((recipe, indexOfRecipe) => {
-                return (
-                    <div className="panel panel-default" key={indexOfRecipe}>
-                        <div className="panel-heading"
-                             role="tab"
-                             id={"recipe-title-" + indexOfRecipe}>
-                            <h4 className="panel-title">
-                                <a role="button"
-                                   data-toggle="collapse"
-                                   data-parent="#accordion"
-                                   href={ "#recipe-data-" + indexOfRecipe}
-                                   aria-expanded="true"
-                                   aria-controls={ "#recipe-data-" + indexOfRecipe}>
-                                    {recipe.title}
-                                </a>
-                            </h4>
-                        </div>
-                        <div id={"recipe-data-" + indexOfRecipe}
-                             className="panel-collapse collapse"
-                             role="tabpanel"
-                             aria-labelledby={"recipe-title-" + indexOfRecipe}>
-                            <div className="panel-body">
-                                {recipe.ingredients.map((ingredient, indexOfIng) => {
-                                    return <li key={indexOfIng}>{ ingredient }</li>
-                                })}
-                            </div>
-                            <button
-                                value="Edit"
-                                className="btn btn-default btn-sm"
-                                onClick={() => props.handleEditButtonClick(recipe)}
-                            >Edit</button>
-                            <button
-                                value="Delete"
-                                className="btn btn-default btn-sm"
-                                onClick={() => props.deleteRecipe(indexOfRecipe)}
-                            >Delete</button>
-                        </div>
-                    </div>
-                    )
-                })
-            }
-        </div>
-    )
-}
-
 class RecipeBox extends React.Component {
     localStorageKey = "dandel10n_recipes";
     constructor(props) {
@@ -59,12 +10,14 @@ class RecipeBox extends React.Component {
         this.state = {
             recipes: [
                 {
-                    title: "Test1",
-                    ingredients: ["ing1", "ing2", "ing3"],
+                    title: "Spaghetti alla carbonara",
+                    ingredients: ["spaghetti", "pancetta", "olive oil", "pecorino cheese", "garlic", "eggs", "parsley leaves", "black pepper and salt"],
+                    method: "Bring 4.5 litres water to the boil in a large saucepan with eight teaspoons salt. Add the spaghetti and cook until al dente. Meanwhile, cut the pancetta into short little strips. Heat a large, deep frying pan over a medium-high heat, add the oil and the pancetta and fry until lightly golden. Add the garlic and parsley and cook for a few seconds, then remove from the heat and set aside. Drain the spaghetti well, tip into the frying pan with the pancetta, garlic and parsley, add the beaten eggs and half the grated pecorino cheese and toss together well. The heat from the spaghetti will be sufficient to partly cook the egg, but still leave it moist and creamy. Take to the table and serve in warmed pasta bowls, sprinkled with the rest of the cheese."
                 },
                 {
-                    title: "Test2",
-                    ingredients: ["ing1", "ing2", "ing3"],
+                    title: "Tuna bean salad",
+                    ingredients: ["mixed beans", "boiled eggs", "cherry tomatoes", "spring onions", "tuna steak", "olive oil", "wine vinegar", "mustard", "black pepper"],
+                    method: "For the dressing, whisk the oil, vinegar and mustard in a large bowl until thick. Season with black pepper. Add mixed beans, cherry tomatoes and spring onions to the dressing and mix. Flake the tuna on top and add the hard-boiled eggs."
                 }
             ],
             formIsShown: false,
@@ -93,11 +46,12 @@ class RecipeBox extends React.Component {
         localStorage[this.localStorageKey] = JSON.stringify(this.state.recipes);
     }
 
-    addRecipe(recipeTitle, recipeIngredients)  {
+    addRecipe(recipeTitle, recipeIngredients, recipeMethod)  {
         const {recipes, recipeToEdit} = this.state;
         const newRecipe = {
             title: recipeTitle,
             ingredients: recipeIngredients,
+            method: recipeMethod
         }
         const editedRecipesArray = recipes;
 
@@ -189,6 +143,7 @@ class RecipeBox extends React.Component {
                                 handleEditButtonClick={this.handleEditButtonClick}
                             />
                             <button
+                                id="addRecipeButton"
                                 value="addRecipe"
                                 className="btn btn-default"
                                 onClick={this.showForm}
@@ -199,6 +154,57 @@ class RecipeBox extends React.Component {
             </div>
         )
     }
+}
+
+const Recipes = (props) => {
+    return (
+        <div className="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            { props.recipes.map((recipe, indexOfRecipe) => {
+                return (
+                    <div className="panel panel-default recipePanel" key={indexOfRecipe}>
+                        <div className="panel-heading recipePanel-header"
+                             role="tab"
+                             id={"recipe-title-" + indexOfRecipe}>
+                            <h2 className="panel-title recipePanel-title">
+                                <a role="button"
+                                   data-toggle="collapse"
+                                   data-parent="#accordion"
+                                   href={ "#recipe-data-" + indexOfRecipe}
+                                   aria-expanded="true"
+                                   aria-controls={ "#recipe-data-" + indexOfRecipe}>
+                                    {recipe.title}
+                                </a>
+                            </h2>
+                        </div>
+                        <div id={"recipe-data-" + indexOfRecipe}
+                             className="panel-collapse collapse"
+                             role="tabpanel"
+                             aria-labelledby={"recipe-title-" + indexOfRecipe}>
+                            <div className="panel-body recipePanel-body">
+                                {recipe.ingredients.map((ingredient, indexOfIng) => {
+                                    return <li key={indexOfIng}>{ ingredient }</li>
+                                })}
+                            </div>
+                            <div className="panel-body recipePanel-body">
+                                {recipe.method}
+                            </div>
+                            <button
+                                value="Edit"
+                                className="btn btn-default btn-sm"
+                                onClick={() => props.handleEditButtonClick(recipe)}
+                            ><span className="glyphicon glyphicon-pencil panelButton" aria-hidden="true"></span></button>
+                            <button
+                                value="Delete"
+                                className="btn btn-default btn-sm"
+                                onClick={() => props.deleteRecipe(indexOfRecipe)}
+                            ><span className="glyphicon glyphicon-trash panelButton" aria-hidden="true"></span></button>
+                        </div>
+                    </div>
+                    )
+                })
+            }
+        </div>
+    )
 }
 
 class Form extends React.Component {
@@ -215,9 +221,10 @@ class Form extends React.Component {
         const newRecipeIngredients = this.newRecipeIngredients.value.split(',').map(
             item => { return item.trim() }
         ).filter(item => item != "");
+        const newRecipeMethod = this.newRecipeMethod.value;
 
         if (newRecipeTitle !== '' && newRecipeIngredients.length !== 0) {
-            this.props.onSubmit(newRecipeTitle, newRecipeIngredients);
+            this.props.onSubmit(newRecipeTitle, newRecipeIngredients, newRecipeMethod);
             this.handleCancel();
         }
 
@@ -251,7 +258,7 @@ class Form extends React.Component {
                 <div className="form-group">
                     <label htmlFor="newRecipeTitle">Recipe</label>
                     <input
-                        className="form-control"
+                        className="form-control recipeForm"
                         id="newRecipeTitle"
                         ref={input => this.newRecipeTitle = input}
                         type="text"
@@ -261,7 +268,7 @@ class Form extends React.Component {
                     />
                     <label htmlFor="newRecipeIngredients">Ingredients</label>
                     <textarea
-                        className="form-control"
+                        className="form-control recipeForm"
                         id="newRecipeIngredients"
                         ref={input => this.newRecipeIngredients = input}
                         rows="3"
@@ -269,16 +276,26 @@ class Form extends React.Component {
                         placeholder={"Enter ingredients, separated by commas"}
                         defaultValue={this.props.recipe && this.props.recipe.ingredients || ""}
                     />
+                    <label htmlFor="newRecipeMethod">Method</label>
+                    <textarea
+                        className="form-control recipeForm"
+                        id="newRecipeMethod"
+                        ref={input => this.newRecipeMethod = input}
+                        rows="5"
+                        name="formMethod"
+                        placeholder={"Enter method"}
+                        defaultValue={this.props.recipe && this.props.recipe.method || ""}
+                    />
                     <button
                         type="submit"
                         value="Save"
                         className="btn btn-default btn-sm"
-                    >Save</button>
+                    ><span className="glyphicon glyphicon-ok panelButton" aria-hidden="true"></span></button>
                     <button
                         value="Cancel"
                         className="btn btn-default btn-sm"
                         onClick={this.handleCancel}
-                    >Cancel</button>
+                    ><span className="glyphicon glyphicon-remove panelButton" aria-hidden="true"></span></button>
                 </div>
             </form>
         )
