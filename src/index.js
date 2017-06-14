@@ -40,14 +40,6 @@ class RecipeBox extends React.Component {
                 this.setState({ recipes: JSON.parse(savedData) });
             }
         }
-}
-
-    componentDidMount() {
-        if (this.state.recipes.length === 0) {
-            this.setState({
-                message: "No recipes in your box, add some."
-            })
-        }
     }
 
     componentDidUpdate() {
@@ -80,12 +72,6 @@ class RecipeBox extends React.Component {
         const newArrayOfRecipes = this.state.recipes;
         newArrayOfRecipes.splice(index, 1);
         this.setState({ recipes: newArrayOfRecipes });
-
-        if (newArrayOfRecipes.length === 0) {
-            this.setState({
-                message: "No recipes in your box, add some."
-            })
-        }
     }
 
     handleEditButtonClick(recipe) {
@@ -134,7 +120,7 @@ class RecipeBox extends React.Component {
                     }
 
                     {
-                        this.state.message === "" && this.state.recipes.length === 0 && !this.state.formIsShown &&
+                        this.state.recipes.length === 0 && !this.state.formIsShown &&
                         <p className="message text-danger">No recipes in your box, add some.</p>
                     }
 
@@ -234,7 +220,7 @@ class Form extends React.Component {
         const newRecipeTitle = this.newRecipeTitle.value;
         const newRecipeIngredients = this.newRecipeIngredients.value.split(',').map(
             item => { return item.trim() }
-        ).filter(item => item != "");
+        ).filter(item => item !== "");
         const newRecipeMethod = this.newRecipeMethod.value;
 
         if (newRecipeTitle !== '' && newRecipeIngredients.length !== 0) {
