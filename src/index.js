@@ -40,6 +40,14 @@ class RecipeBox extends React.Component {
                 this.setState({ recipes: JSON.parse(savedData) });
             }
         }
+}
+
+    componentDidMount() {
+        if (this.state.recipes.length === 0) {
+            this.setState({
+                message: "No recipes in your box, add some."
+            })
+        }
     }
 
     componentDidUpdate() {
@@ -88,14 +96,15 @@ class RecipeBox extends React.Component {
     showForm() {
         this.setState({
             formIsShown: true,
-            message: ""
+            message: ''
         });
     }
 
     hideForm() {
         this.setState({
             formIsShown: false,
-            recipeToEdit: ""
+            recipeToEdit: null,
+            message: ''
          });
     }
 
@@ -122,6 +131,11 @@ class RecipeBox extends React.Component {
                     {
                         this.state.message !== "" &&
                         <p className="message text-danger">{this.state.message}</p>
+                    }
+
+                    {
+                        this.state.message === "" && this.state.recipes.length === 0 && !this.state.formIsShown &&
+                        <p className="message text-danger">No recipes in your box, add some.</p>
                     }
 
                     {
